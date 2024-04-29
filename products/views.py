@@ -9,34 +9,30 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import permission_classes
 
 
-class ProductListAPIView(APIView):
-    
-    permission_classes = [IsAuthenticated] #로그인 여부
-    
-    @extend_schema(
+@extend_schema(
         tags=["Product"],
         description="Product 목록 조회를 위한 API",
     )
-    
+class ProductListAPIView(APIView):
     def get(self, request):
         product = Product.objects.all()
         serializer = ProductSerializer(product, many=True)
         return Response(serializer.data)
-
-    @extend_schema(
-        tags=["Product"],
-        description="Product 생성을 위한 API",
-        request=ProductSerializer
-    )
     
-    def post(self, request):
-        serializer = ProductSerializer(data=request.data)
+    
+    def post(self, product_pk):
+        if not product_pk.user.is_authenticated:
+            return Response({"error": "인증이 필요합니다."}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = ProductSerializer(data=product_pk.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
+
+    
 
 class ProductDetailAPIView(APIView):
     
