@@ -1,48 +1,53 @@
 from rest_framework import serializers
 from .models import User
-from django.contrib.auth.password_validation import validate_password # Django의 기본 pw 검증 도구
-from rest_framework.authtoken.models import Token # Token 모델
-from rest_framework.validators import UniqueValidator # 이메일 중복 방지를 위한 검증 도구
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.authtoken.models import Token
+from rest_framework.validators import UniqueValidator # 유니크 값을 찾기 위한 도구
+from django.contrib.auth import authenticate
+
 
 # 회원가입 시리얼라이저
 class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         write_only=True,
         required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())], #유저네임(로그인에 쓰일 id) 중복 체크
     )
     name = serializers.CharField(
         write_only=True,
         required=True,
     )
     
-    birthday = serializers.DateField(input_formats=['%Y-%m-%d'], required=True)
+    birthday = serializers.DateField(input_formats=["%Y-%m-%d"], required=True)
     
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())], # 이메일에 대한 중복 검증
+        validators=[UniqueValidator(queryset=User.objects.all())], # 이메일 중복 체크
     )
     
     password = serializers.CharField(
         write_only=True,
         required=True,
-        validators=[validate_password], # 비밀번호에 대한 검증
+        validators=[validate_password], # 기본적인 비밀번호 체크
     )
     password2 = serializers.CharField( # 비밀번호 확인을 위한 필드
         write_only=True,
         required=True,
     )
     
-    sex=serializers.CharField(
-        write_only=True,
+    gender=serializers.CharField(
+        required=False,   #성별은 빈칸으로 놔둬도 회원가입이 될수 있도록 models에도 수정을 함
+        allow_blank=True
     )
     
     introduce=serializers.CharField(
-        write_only=True,
+        required=False, 
+        allow_blank=True    #자기소개 역시 마찬가지
     )
 
     class Meta:
         model = User
-        fields = ('username','name', 'email', 'password', 'password2', 'birthday', 'sex', 'introduce' )
+        fields = ('username','name', 'email', 'password', 'password2', 'birthday', 'gender', 'introduce' ) #입력가능한 목록들
 
     def validate(self, data): # password과 password2의 일치 여부 확인
         if data['password'] != data['password2']:
@@ -52,13 +57,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # CREATE 요청에 대해 create 메서드를 오버라이딩하여, 유저를 생성하고 토큰도 생성하게 해준다.
         user = User.objects.create_user(
             username=validated_data['username'],
+            name=validated_data['name'],
+            birthday=validated_data['birthday'],
             email=validated_data['email'],
+            gender=validated_data['gender'],
+            introduce=validated_data['introduce'],
         )
 
         user.set_password(validated_data['password'])
         user.save()
-        token = Token.objects.create(user=user)
         return user
+    
+    
