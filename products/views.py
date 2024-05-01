@@ -23,38 +23,40 @@ class ProductListAPIView(APIView):
         return Response(serializer.data)
     
     
-    def post(self, product_pk):
-        if not product_pk.user.is_authenticated:
+    def post(self, request):
+        if not request.user.is_authenticated:
             return Response({"error": "인증이 필요합니다."}, status=status.HTTP_401_UNAUTHORIZED)
-        serializer = ProductSerializer(data=product_pk.data)
+        serializer = ProductSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
     
 
 class ProductDetailAPIView(APIView):
     
     permission_classes = [IsAuthenticated]
+    lookup_field = 'productId'
     
-    def get_object(self, product_pk):
-        return get_object_or_404(Product, id=product_pk)
+    def get_object(self, productId):
+        return get_object_or_404(Product, id=productId)
     
-    def get(self, request, product_pk):
-        product = self.get_object(product_pk)
+    def get(self, request, productId):
+        product = self.get_object(productId)
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
-    def put(self, request, product_pk):
-        product = self.get_object(product_pk)
+    def put(self, request, productId):
+        product = self.get_object(productId)
         serializer = ProductSerializer(product, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
         
-    def delete(self, request, product_pk):
-        article = self.get_object(product_pk)
-        article.delete()
-        data = {"delete": f"Product({product_pk}) is deleted."}
+    def delete(self, request, productId):
+        product = self.get_object(productId)
+        if product.user != request.user:
+            return Response({"error": "작성자만 삭제할 수 있습니다."}, status=status.HTTP_403_FORBIDDEN)
+        product.delete()
+        data = {"delete": f"Product({productId}) is deleted."}
         return Response(data, status=status.HTTP_204_NO_CONTENT)

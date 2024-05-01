@@ -11,7 +11,7 @@ class User(AbstractUser):
     birthday=models.DateField(auto_now=False, auto_now_add=False)
     gender=models.CharField(max_length=20, default="", blank=True, null=True)
     introduce=models.CharField(max_length=200, default="", blank=True, null=True)
-    profile_photo = models.ImageField(upload_to='profile/', default='default.png')
+    profile_photo = models.ImageField(upload_to='profile/', default='user.png')
     
     
 @receiver(post_save, sender=User)
