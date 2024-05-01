@@ -5,7 +5,6 @@ from .serializers import RegisterSerializer,ProfileSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .permissions import CustomReadOnly
 
 
 class RegisterView(generics.CreateAPIView):
@@ -14,6 +13,7 @@ class RegisterView(generics.CreateAPIView):
     
 
 class ProfileView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = ProfileSerializer
-    queryset = User.objects.filter(username=['username'])
-    permission_classes = [CustomReadOnly]
+    queryset = User.objects.all()
+    lookup_field = 'username'

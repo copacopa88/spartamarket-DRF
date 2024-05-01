@@ -8,6 +8,7 @@ class Product(models.Model):
     updated_at = models.DateField(auto_now=True)
     image = models.ImageField(upload_to="products/", null=False)
     price = models.PositiveIntegerField(null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='products')
     
     def __str__(self):
         return self.title

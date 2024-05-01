@@ -39,7 +39,7 @@ class ProductDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get_object(self, product_pk):
-        return get_object_or_404(Product, pk=product_pk)
+        return get_object_or_404(Product, id=product_pk)
     
     def get(self, request, product_pk):
         product = self.get_object(product_pk)
