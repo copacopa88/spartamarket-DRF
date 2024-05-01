@@ -1,7 +1,4 @@
-from django.http import JsonResponse, HttpResponse
 from .models import Product
-from django.core import serializers
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .serializers import ProductSerializer
@@ -9,7 +6,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import permission_classes
+from django.core.files.storage import default_storage
+
 
 
 @extend_schema(
@@ -40,14 +38,11 @@ class ProductDetailAPIView(APIView):
     
     def get_object(self, productId):
         return get_object_or_404(Product, id=productId)
-    
-    def get(self, request, productId):
-        product = self.get_object(productId)
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
 
     def put(self, request, productId):
         product = self.get_object(productId)
+        if product.user != request.user and not request.user.is_superuser:
+            return Response({"error": "작성자만 수정할 수 있습니다."}, status=status.HTTP_403_FORBIDDEN)
         serializer = ProductSerializer(product, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -55,8 +50,9 @@ class ProductDetailAPIView(APIView):
         
     def delete(self, request, productId):
         product = self.get_object(productId)
-        if product.user != request.user:
+        if product.user != request.user and not request.user.is_superuser:
             return Response({"error": "작성자만 삭제할 수 있습니다."}, status=status.HTTP_403_FORBIDDEN)
         product.delete()
+        default_storage.delete(product.image.path)
         data = {"delete": f"Product({productId}) is deleted."}
         return Response(data, status=status.HTTP_204_NO_CONTENT)

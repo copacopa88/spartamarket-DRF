@@ -44,10 +44,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         required=False, 
         allow_blank=True    #자기소개 역시 마찬가지
     )
+    
+    profile_photo=serializers.ImageField(
+        required=False,   #프로필 사진도 넣어보았다.
+    )
+    
 
     class Meta:
         model = User
-        fields = ('username','name', 'email', 'password', 'password2', 'birthday', 'gender', 'introduce' ) #입력가능한 목록들
+        fields = ('username','name', 'email', 'password', 'password2', 'birthday', 'gender', 'introduce', 'profile_photo') #입력가능한 목록들
 
     def validate(self, data): # password과 password2의 일치 여부 확인
         if data['password'] != data['password2']:
@@ -65,7 +70,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             gender=validated_data['gender'],
             introduce=validated_data['introduce'],
         )
-
         user.set_password(validated_data['password'])
         user.save()
         return user
