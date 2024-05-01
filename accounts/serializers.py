@@ -52,7 +52,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, data): # password과 password2의 일치 여부 확인
         if data['password'] != data['password2']:
             raise serializers.ValidationError(
-                {"password": "Password fields didn't match."})
+                {"password": "재입력한 비밀번호가 서로 맞지 않습니다."})
         
         return data
 
@@ -70,4 +70,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
-    
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username", "name", "email", "birthday", "gender", "introduce", "profile_photo")

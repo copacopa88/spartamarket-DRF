@@ -6,7 +6,7 @@ class Product(models.Model):
     content = models.TextField(null=False)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
-    image = models.ImageField(upload_to="image/", null=False)
+    image = models.ImageField(upload_to="products/", null=False)
     price = models.PositiveIntegerField(null=True)
     
     def __str__(self):
