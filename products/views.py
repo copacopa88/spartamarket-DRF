@@ -7,8 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from django.core.files.storage import default_storage
-
-
+from rest_framework.pagination import PageNumberPagination
 
 @extend_schema(
         tags=["Product"],
@@ -16,9 +15,12 @@ from django.core.files.storage import default_storage
     )
 class ProductListAPIView(APIView):
     def get(self, request):
+        paginator = PageNumberPagination()
+        paginator.page_size = 5
         product = Product.objects.all()
-        serializer = ProductSerializer(product, many=True)
-        return Response(serializer.data)
+        context = paginator.paginate_queryset(product, request)
+        serializer = ProductSerializer(context, many=True)
+        return paginator.get_paginated_response(serializer.data)
     
     
     def post(self, request):

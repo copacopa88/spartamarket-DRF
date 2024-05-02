@@ -6,12 +6,10 @@ from rest_framework.validators import UniqueValidator # 유니크 값을 찾기 
 # 회원가입 시리얼라이저
 class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
-        write_only=True,
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())], #유저네임(로그인에 쓰일 id) 중복 체크
     )
     name = serializers.CharField(
-        write_only=True,
         required=True,
     )
     
