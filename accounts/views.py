@@ -1,11 +1,9 @@
 # users/views.py
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from .models import User
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
 from .serializers import RegisterSerializer,ProfileSerializer
 from rest_framework.permissions import IsAuthenticated
 
