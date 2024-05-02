@@ -1,10 +1,7 @@
 from rest_framework import serializers
 from .models import User
 from django.contrib.auth.password_validation import validate_password
-from rest_framework.authtoken.models import Token
 from rest_framework.validators import UniqueValidator # 유니크 값을 찾기 위한 도구
-from django.contrib.auth import authenticate
-
 
 # 회원가입 시리얼라이저
 class RegisterSerializer(serializers.ModelSerializer):
